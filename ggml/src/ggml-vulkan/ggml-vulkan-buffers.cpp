@@ -213,7 +213,115 @@ vk_buffer ggml_vk_create_buffer_check(vk_device& device, size_t size, vk::Memory
     }
 }
 
+
+#if defined(_WIN32)
+// Opt-in allocation experiment: retain D3D12 DEFAULT resources while Vulkan
+// performs all transfers and computation. No D3D12 commands run on the resource.
+static vk_buffer ggml_vk_import_d3d12_buffer(vk_device & device, size_t size) {
+    const char * setting = getenv("GGML_VK_D3D12_MEMORY_MIB");
+    if (!setting || !device->external_memory_win32 || !size) return {};
+    std::lock_guard<std::mutex> lock(device->d3d12_import_mutex);
+    const size_t mib = std::strtoull(setting, nullptr, 10);
+    if (mib > SIZE_MAX / (1024 * 1024)) return {};
+    const size_t limit = mib * 1024 * 1024;
+    if (size > limit || device->d3d12_imported_bytes > limit - size) return {};
+    vk_buffer buf = std::make_shared<vk_buffer_struct>();
+    HANDLE shared = nullptr;
+    try {
+        if (!device->import_d3d_device) {
+            vk::PhysicalDeviceIDProperties id;
+            vk::PhysicalDeviceProperties2 props;
+            props.pNext = &id;
+            device->physical_device.getProperties2(&props);
+            if (!id.deviceLUIDValid) return {};
+            LUID luid;
+            memcpy(&luid, id.deviceLUID.data(), sizeof(luid));
+            Microsoft::WRL::ComPtr<IDXGIFactory4> factory;
+            Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
+            HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory));
+            if (FAILED(hr)) throw std::runtime_error("CreateDXGIFactory1 failed");
+            hr = factory->EnumAdapterByLuid(luid, IID_PPV_ARGS(&adapter));
+            if (FAILED(hr)) throw std::runtime_error("EnumAdapterByLuid failed");
+            hr = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&device->import_d3d_device));
+            if (FAILED(hr)) throw std::runtime_error("D3D12CreateDevice failed");
+        }
+        vk::BufferUsageFlags usage = vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst;
+        if (device->buffer_device_address) usage |= vk::BufferUsageFlagBits::eShaderDeviceAddress;
+        vk::ExternalMemoryBufferCreateInfo external;
+        external.handleTypes = vk::ExternalMemoryHandleTypeFlagBits::eD3D12Resource;
+        vk::BufferCreateInfo ci({}, size, usage, vk::SharingMode::eExclusive);
+        ci.pNext = &external;
+        buf->buffer = device->device.createBuffer(ci);
+        auto req = device->device.getBufferMemoryRequirements(buf->buffer);
+        if (req.size > limit - device->d3d12_imported_bytes) {
+            device->device.destroyBuffer(buf->buffer);
+            return {};
+        }
+        D3D12_HEAP_PROPERTIES heap = {};
+        heap.Type = D3D12_HEAP_TYPE_DEFAULT;
+        D3D12_RESOURCE_DESC desc = {};
+        desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        desc.Width = req.size;
+        desc.Height = 1;
+        desc.DepthOrArraySize = 1;
+        desc.MipLevels = 1;
+        desc.SampleDesc.Count = 1;
+        desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+        HRESULT hr = device->import_d3d_device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_SHARED, &desc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&buf->imported_d3d_resource));
+        if (FAILED(hr)) throw std::runtime_error("CreateCommittedResource failed");
+        hr = device->import_d3d_device->CreateSharedHandle(buf->imported_d3d_resource.Get(), nullptr, GENERIC_ALL, nullptr, &shared);
+        if (FAILED(hr)) throw std::runtime_error("CreateSharedHandle failed");
+        auto props = device->device.getMemoryWin32HandlePropertiesKHR(vk::ExternalMemoryHandleTypeFlagBits::eD3D12Resource, shared);
+        auto mem = device->physical_device.getMemoryProperties();
+        uint32_t index = mem.memoryTypeCount;
+        for (uint32_t i = 0; i < mem.memoryTypeCount; ++i) {
+            if ((props.memoryTypeBits & req.memoryTypeBits & (1u << i)) &&
+                (mem.memoryTypes[i].propertyFlags & vk::MemoryPropertyFlagBits::eDeviceLocal)) { index = i; break; }
+        }
+        if (index == mem.memoryTypeCount) throw std::runtime_error("No compatible D3D12 import memory type");
+        vk::MemoryDedicatedAllocateInfo dedicated;
+        dedicated.buffer = buf->buffer;
+        vk::MemoryAllocateFlagsInfo flags;
+        flags.flags = device->buffer_device_address ? vk::MemoryAllocateFlagBits::eDeviceAddress : vk::MemoryAllocateFlags{};
+        flags.pNext = &dedicated;
+        vk::ImportMemoryWin32HandleInfoKHR import;
+        import.handleType = vk::ExternalMemoryHandleTypeFlagBits::eD3D12Resource;
+        import.handle = shared;
+        import.pNext = &flags;
+        buf->device_memory = device->device.allocateMemory({req.size, index, &import});
+        CloseHandle(shared); shared = nullptr;
+        device->device.bindBufferMemory(buf->buffer, buf->device_memory, 0);
+        buf->device = device;
+        buf->size = size;
+        buf->ptr = nullptr;
+        // An imported DEFAULT resource is GPU-only, even on a UMA adapter.
+        buf->memory_property_flags = vk::MemoryPropertyFlagBits::eDeviceLocal;
+        buf->imported_d3d_bytes = req.size;
+        device->d3d12_imported_bytes += req.size;
+        if (device->buffer_device_address) buf->bda_addr = device->device.getBufferAddress({buf->buffer});
+        device->memory_logger->log_allocation(buf, size);
+        GGML_LOG_INFO("ggml_vulkan: D3D12 import %.2f MiB, total %.2f MiB, memory type %u\n", size / 1048576.0, device->d3d12_imported_bytes / 1048576.0, index);
+        return buf;
+    } catch (const std::exception & e) {
+        if (shared) CloseHandle(shared);
+        if (buf->imported_d3d_bytes) device->d3d12_imported_bytes -= buf->imported_d3d_bytes;
+        buf->imported_d3d_bytes = 0;
+        buf->size = 0;
+        if (buf->buffer) device->device.destroyBuffer(buf->buffer);
+        if (buf->device_memory) device->device.freeMemory(buf->device_memory);
+        buf->buffer = VK_NULL_HANDLE;
+        buf->device_memory = VK_NULL_HANDLE;
+        GGML_LOG_WARN("ggml_vulkan: D3D12 import unavailable: %s; using ordinary Vulkan memory\n", e.what());
+        return {};
+    }
+}
+#endif
+
 vk_buffer ggml_vk_create_buffer_device(vk_device& device, size_t size) {
+#if defined(_WIN32)
+    if (auto imported = ggml_vk_import_d3d12_buffer(device, size)) return imported;
+#endif
     vk_buffer buf;
     try {
         if (device->prefer_host_memory) {

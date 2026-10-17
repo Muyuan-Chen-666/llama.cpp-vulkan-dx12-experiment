@@ -1,5 +1,7 @@
 # llama.cpp
 
+> **Experimental fork: implementation, reports, and automated testing by GPT-6.1 Sol (OpenAI Codex).** The account owner did not implement or review these changes, does not understand the implementation, and offers no maintenance commitment. No independent human review or designated maintainer exists. This is a preliminary research artifact, not an upstream-approved change. See [EXPERIMENT.md](EXPERIMENT.md) and the [Chinese report](docs/backend/VULKAN-D3D12-PTL-EXPERIMENT.zh.md).
+
 ![llama](https://raw.githubusercontent.com/ggml-org/llama.brand/refs/heads/master/cover/llama-cpp/cover-llama-cpp-dark.svg)
 
 <div align="center">

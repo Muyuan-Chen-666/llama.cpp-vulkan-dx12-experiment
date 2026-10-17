@@ -1,5 +1,15 @@
 #pragma once
 
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX 1
+#endif
+#define VK_USE_PLATFORM_WIN32_KHR 1
+#include <windows.h>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <wrl/client.h>
+#endif
 #include "ggml-vulkan.h"
 
 #include <vulkan/vulkan_core.h>
@@ -677,6 +687,12 @@ struct vk_device_struct {
     uint64_t suballocation_block_size;
     uint64_t min_imported_host_pointer_alignment;
     bool external_memory_host {};
+#if defined(_WIN32)
+    bool external_memory_win32 {};
+    size_t d3d12_imported_bytes = 0;
+    std::mutex d3d12_import_mutex;
+    Microsoft::WRL::ComPtr<ID3D12Device> import_d3d_device;
+#endif
     bool fp16;
     bool bf16;
     bool pipeline_robustness;
@@ -1041,6 +1057,10 @@ struct vk_buffer_struct {
     vk::DeviceAddress bda_addr {};
 
     vk_device device;
+#if defined(_WIN32)
+    Microsoft::WRL::ComPtr<ID3D12Resource> imported_d3d_resource;
+    size_t imported_d3d_bytes = 0;
+#endif
 
     ~vk_buffer_struct() {
         if (size == 0) {
@@ -1050,8 +1070,14 @@ struct vk_buffer_struct {
 
         // bump before destroying, so a thread that sees the buffer gone also sees the new count
         device->buffer_destroy_count.fetch_add(1, std::memory_order_release);
-        device->device.freeMemory(device_memory);
         device->device.destroyBuffer(buffer);
+        device->device.freeMemory(device_memory);
+#if defined(_WIN32)
+        if (imported_d3d_bytes) {
+            std::lock_guard<std::mutex> lock(device->d3d12_import_mutex);
+            device->d3d12_imported_bytes -= imported_d3d_bytes;
+        }
+#endif
     }
 };
 

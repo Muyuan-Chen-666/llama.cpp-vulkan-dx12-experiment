@@ -1,0 +1,111 @@
+{
+  "source": "https://huggingface.co/unsloth/Qwen3.5-27B-GGUF/tree/main",
+  "retrieved_date": "2026-10-18",
+  "executed_on_device": false,
+  "files": [
+    {
+      "path": "BF16/Qwen3.5-27B-BF16-00001-of-00002.gguf",
+      "bytes": 49954637280
+    },
+    {
+      "path": "BF16/Qwen3.5-27B-BF16-00002-of-00002.gguf",
+      "bytes": 3853644192
+    },
+    {
+      "path": "Qwen3.5-27B-IQ4_NL.gguf",
+      "bytes": 15687894944
+    },
+    {
+      "path": "Qwen3.5-27B-IQ4_XS.gguf",
+      "bytes": 14977484704
+    },
+    {
+      "path": "Qwen3.5-27B-Q3_K_M.gguf",
+      "bytes": 13505116064
+    },
+    {
+      "path": "Qwen3.5-27B-Q3_K_S.gguf",
+      "bytes": 12289423264
+    },
+    {
+      "path": "Qwen3.5-27B-Q4_0.gguf",
+      "bytes": 15721973664
+    },
+    {
+      "path": "Qwen3.5-27B-Q4_1.gguf",
+      "bytes": 17182934944
+    },
+    {
+      "path": "Qwen3.5-27B-Q4_K_M.gguf",
+      "bytes": 16740812704
+    },
+    {
+      "path": "Qwen3.5-27B-Q4_K_S.gguf",
+      "bytes": 15769159584
+    },
+    {
+      "path": "Qwen3.5-27B-Q5_K_M.gguf",
+      "bytes": 19608995744
+    },
+    {
+      "path": "Qwen3.5-27B-Q5_K_S.gguf",
+      "bytes": 18889000864
+    },
+    {
+      "path": "Qwen3.5-27B-Q6_K.gguf",
+      "bytes": 22453933984
+    },
+    {
+      "path": "Qwen3.5-27B-Q8_0.gguf",
+      "bytes": 28595763104
+    },
+    {
+      "path": "Qwen3.5-27B-UD-IQ2_M.gguf",
+      "bytes": 10188072864
+    },
+    {
+      "path": "Qwen3.5-27B-UD-IQ2_XXS.gguf",
+      "bytes": 8573593504
+    },
+    {
+      "path": "Qwen3.5-27B-UD-IQ3_XXS.gguf",
+      "bytes": 11506493344
+    },
+    {
+      "path": "Qwen3.5-27B-UD-Q2_K_XL.gguf",
+      "bytes": 11213752224
+    },
+    {
+      "path": "Qwen3.5-27B-UD-Q3_K_XL.gguf",
+      "bytes": 14438533024
+    },
+    {
+      "path": "Qwen3.5-27B-UD-Q4_K_XL.gguf",
+      "bytes": 17621125024
+    },
+    {
+      "path": "Qwen3.5-27B-UD-Q5_K_XL.gguf",
+      "bytes": 20171253664
+    },
+    {
+      "path": "Qwen3.5-27B-UD-Q6_K_XL.gguf",
+      "bytes": 25675642784
+    },
+    {
+      "path": "Qwen3.5-27B-UD-Q8_K_XL.gguf",
+      "bytes": 35528652704
+    },
+    {
+      "path": "mmproj-BF16.gguf",
+      "bytes": 931145984
+    },
+    {
+      "path": "mmproj-F16.gguf",
+      "bytes": 927607040
+    },
+    {
+      "path": "mmproj-F32.gguf",
+      "bytes": 1842940160
+    }
+  ]
+}

@@ -4111,6 +4111,10 @@ vk_device ggml_vk_get_device(size_t idx) {
             } else if (strcmp("VK_EXT_memory_priority", properties.extensionName) == 0 &&
                        getenv("GGML_VK_ENABLE_MEMORY_PRIORITY")) {
                 device->memory_priority = true;
+#if defined(_WIN32)
+            } else if (strcmp("VK_KHR_external_memory_win32", properties.extensionName) == 0 && getenv("GGML_VK_D3D12_MEMORY_MIB")) {
+                device->external_memory_win32 = true;
+#endif
             } else if (strcmp("VK_EXT_external_memory_host", properties.extensionName) == 0) {
                 device->external_memory_host = true;
 #if defined(VK_EXT_shader_64bit_indexing)
@@ -4460,6 +4464,9 @@ vk_device ggml_vk_get_device(size_t idx) {
         if (device->external_memory_host) {
             device_extensions.push_back("VK_EXT_external_memory_host");
         }
+#if defined(_WIN32)
+        if (device->external_memory_win32) device_extensions.push_back("VK_KHR_external_memory_win32");
+#endif
 
 #if defined(VK_EXT_shader_64bit_indexing)
         VkPhysicalDeviceShader64BitIndexingFeaturesEXT shader_64bit_indexing_features {};
@@ -13035,6 +13042,12 @@ enum ggml_status ggml_backend_vk_buffer_init_tensor(ggml_backend_buffer_t buffer
     if (tensor->view_src != nullptr) {
         GGML_ASSERT(tensor->view_src->buffer->buft == buffer->buft);
     }
+#if defined(_WIN32)
+    auto * ctx = static_cast<ggml_backend_vk_buffer_context *>(buffer->context);
+    if (ctx->dev_buffer->imported_d3d_bytes && strstr(tensor->name, "_exps") != nullptr) {
+        GGML_LOG_INFO("ggml_vulkan: D3D12 resident expert %s %.2f MiB\n", tensor->name, ggml_nbytes(tensor) / 1048576.0);
+    }
+#endif
     return GGML_STATUS_SUCCESS;
 }
 

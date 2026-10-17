@@ -1,0 +1,212 @@
+{
+  "context": 32768,
+  "cpuMoeLayers": 11,
+  "importLimitMiB": 7168,
+  "cacheType": "f16",
+  "count": 46,
+  "expertMiB": 5476.0,
+  "layers": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26
+  ],
+  "tensors": [
+    {
+      "tensor": "blk.11.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.11.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.11.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.12.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.12.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.12.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.13.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.13.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.13.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.14.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.14.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.14.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.15.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.15.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.15.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.16.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.16.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.16.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.17.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.17.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.17.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.18.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.18.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.18.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.19.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.19.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.19.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.20.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.20.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.20.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.21.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.21.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.21.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.22.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.22.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.22.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.23.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.23.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.23.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.24.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.24.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.24.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.25.ffn_down_exps.weight",
+      "MiB": 136.0
+    },
+    {
+      "tensor": "blk.25.ffn_gate_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.25.ffn_up_exps.weight",
+      "MiB": 110.0
+    },
+    {
+      "tensor": "blk.26.ffn_down_exps.weight",
+      "MiB": 136.0
+    }
+  ]
+}
